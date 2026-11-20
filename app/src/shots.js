@@ -1,10 +1,14 @@
-// Fixed scenes for screenshots: ?shot=editor shows the page with sample photos
-// loaded; ?shot=cover shows the cover alone; ?shot=export also runs the real
-// export and stores its PNG data URL on window.__exportedPng.
-// `photo` picks the first sample (samples/<photo>.jpg), `photo2` the second,
-// `caption`, `layout`, `grade` and `size` set the cover. window.__shotReady is
-// set once the scene is painted.
+// Fixed scenes for screenshots, driven by the page's `?shot=` query.
+//   ?shot=editor — the editor with sample photos loaded.
+//   ?shot=cover  — the cover alone, no editor chrome.
+//   ?shot=export — the cover alone, and the real exported PNG is stored as a
+//                  data URL on window.__exportedPng.
+// `photo` picks the first sample (samples/<photo>.jpg), `photo2` the second;
+// `caption`, `subtitle`, `layout`, `grade` and `size` set the cover; `oy0`
+// pans the hero panel's photo down so a tall photo's subject stays in frame.
+// window.__shotReady is set once the scene is painted.
 import { panelsFor } from './cover.js';
+
 export async function runShot(shot, query, api) {
   const { state, loadImage, redraw } = api;
   const caption = query.get('caption') ?? 'Sunset Heist';
@@ -26,8 +30,8 @@ export async function runShot(shot, query, api) {
   state.grade = grade;
   state.size = size;
   state.panels = panelsFor(layout, []);
+  // Alternate the two photos across the panels.
   state.panels.forEach((p, i) => { p.photo = i % 2; });
-  // `oy0` pans the hero panel's photo down so a tall photo's subject stays in frame.
   const oy0 = Number(query.get('oy0') ?? '0');
   if (oy0 && state.panels[0]) state.panels[0].oy = oy0;
   document.getElementById('caption').value = caption;

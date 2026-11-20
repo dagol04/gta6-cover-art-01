@@ -34,6 +34,10 @@ const MIME = {
 };
 
 createServer((request, response) => {
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    response.writeHead(405, { 'allow': 'GET, HEAD' }).end('method not allowed');
+    return;
+  }
   const url = new URL(request.url ?? '/', 'http://localhost');
   let pathname;
   try {
@@ -62,7 +66,11 @@ createServer((request, response) => {
     'content-length': size,
     'cache-control': 'no-store',
   });
+  if (request.method === 'HEAD') {
+    response.end();
+    return;
+  }
   createReadStream(file).pipe(response);
 }).listen(port, '127.0.0.1', () => {
-  console.log(`app/ is on http://localhost:${port}`);
+  console.log(`Sunset Cover Studio is on http://localhost:${port} — open it in desktop Chrome`);
 });

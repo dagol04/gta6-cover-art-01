@@ -46,7 +46,7 @@ html, body {
   font-weight: 400;
   letter-spacing: 1px;
   text-transform: uppercase;
-  background: linear-gradient(90deg, #ffb347, #ff5e8a 55%, #b967ff);
+  background: linear-gradient(100deg, #ffb347, #ff5e8a 55%, #b967ff);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -92,6 +92,11 @@ input[type='text'] {
 }
 
 input[type='text']:focus { outline: 2px solid #ff5e8a; outline-offset: 1px; }
+
+button:focus-visible, select:focus-visible, input[type='range']:focus-visible {
+  outline: 2px solid #ffb347;
+  outline-offset: 2px;
+}
 
 .choices { display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -183,7 +188,7 @@ input[type='text']:focus { outline: 2px solid #ff5e8a; outline-offset: 1px; }
   font-weight: 800;
   font-size: 16px;
   color: #1d0f33;
-  background: linear-gradient(90deg, #ffb347, #ff5e8a);
+  background: linear-gradient(100deg, #ffb347, #ff5e8a);
   border: 0;
   border-radius: 10px;
   padding: 12px;

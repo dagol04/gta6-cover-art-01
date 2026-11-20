@@ -1,5 +1,5 @@
-// Sunset Cover Studio — wires the editor: photo slots, layout/grade/size choices,
-// panel selection and dragging, live preview, and PNG export.
+// Sunset Cover Studio — the editor: photo slots, layout/grade/size choices, panel
+// selection and dragging, the live preview, and PNG export.
 // A `?shot=` query sets up a fixed scene for a screenshot instead (./shots.js).
 import { drawCover, renderCover, panelsFor, LAYOUTS, SIZES } from './cover.js';
 import { runShot } from './shots.js';
@@ -11,6 +11,7 @@ const statusEl = document.getElementById('status');
 const slotsEl = document.getElementById('slots');
 const panelRowsEl = document.getElementById('panelRows');
 
+// The two sample photos shipped with the app, made with an image model.
 const SAMPLES = [
   { file: 'boulevard.jpg', label: 'Sample · Boulevard' },
   { file: 'pier.jpg', label: 'Sample · Pier' },
@@ -29,7 +30,7 @@ const state = {
 
 let selectedPanel = 0;
 
-/** Loads an image from a URL, resolving once it can be drawn. */
+/** Loads an image from a URL and resolves once it can be drawn. */
 export function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -39,6 +40,7 @@ export function loadImage(url) {
   });
 }
 
+/** Redraws the live preview at the chosen export size. */
 function redraw() {
   const { w, h } = SIZES[state.size];
   if (canvas.width !== w || canvas.height !== h) {
@@ -52,31 +54,32 @@ function setStatus(text) {
   statusEl.textContent = text;
 }
 
-/** Rebuilds the three photo slot cards (thumbnail, name, upload / sample buttons). */
+/** Small DOM helper: an element with a class and children. */
+function el(tag, className, ...children) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  for (const child of children) {
+    node.append(child);
+  }
+  return node;
+}
+
+/** Rebuilds the three photo slot cards: thumbnail, name, upload / sample buttons. */
 function renderSlots() {
   slotsEl.innerHTML = '';
   state.photos.forEach((photo, i) => {
-    const slot = document.createElement('div');
-    slot.className = 'slot';
-    const thumb = document.createElement('img');
+    const thumb = el('img');
     thumb.alt = `Photo ${i + 1}`;
     thumb.src = photo
       ? photo.src
       : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    const body = document.createElement('div');
-    body.className = 'slot-body';
-    const name = document.createElement('div');
-    name.className = 'slot-name';
-    name.textContent = `Photo ${i + 1} — ${state.photoNames[i]}`;
-    const actions = document.createElement('div');
-    actions.className = 'slot-actions';
+    const name = el('div', 'slot-name', `Photo ${i + 1} — ${state.photoNames[i]}`);
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
     fileInput.id = `photo-file-${i}`;
-    const uploadBtn = document.createElement('button');
+    const uploadBtn = el('button', null, 'Upload');
     uploadBtn.type = 'button';
-    uploadBtn.textContent = 'Upload';
     uploadBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', async () => {
       const file = fileInput.files[0];
@@ -93,9 +96,8 @@ function renderSlots() {
         setStatus(`Could not read ${file.name}.`);
       }
     });
-    const sampleBtn = document.createElement('button');
+    const sampleBtn = el('button', null, 'Sample');
     sampleBtn.type = 'button';
-    sampleBtn.textContent = 'Sample';
     sampleBtn.addEventListener('click', async () => {
       const sample = SAMPLES[i % SAMPLES.length];
       try {
@@ -110,14 +112,13 @@ function renderSlots() {
         setStatus('Sample photo failed to load.');
       }
     });
-    actions.append(uploadBtn, sampleBtn);
-    body.append(name, actions);
-    slot.append(thumb, body, fileInput);
-    slotsEl.append(slot);
+    const actions = el('div', 'slot-actions', uploadBtn, sampleBtn);
+    const body = el('div', 'slot-body', name, actions);
+    slotsEl.append(el('div', 'slot', thumb, body, fileInput));
   });
 }
 
-/** Puts a newly loaded photo into the first empty panel, if there is one. */
+/** Drops a newly loaded photo into the first empty panel, if there is one. */
 function autoAssign(photoIndex) {
   const empty = state.panels.findIndex((p) => p.photo === -1);
   if (empty !== -1) state.panels[empty].photo = photoIndex;
@@ -128,17 +129,12 @@ function renderPanelRows() {
   panelRowsEl.innerHTML = '';
   const letters = ['A', 'B', 'C', 'D'];
   state.panels.forEach((panel, i) => {
-    const row = document.createElement('div');
-    row.className = `panel-row${i === selectedPanel ? ' is-selected' : ''}`;
+    const row = el('div', `panel-row${i === selectedPanel ? ' is-selected' : ''}`);
     row.addEventListener('click', () => {
       selectedPanel = i;
       renderPanelRows();
     });
-    const head = document.createElement('div');
-    head.className = 'row-head';
-    const title = document.createElement('span');
-    title.className = 'row-title';
-    title.textContent = `Panel ${letters[i]}`;
+    const title = el('span', 'row-title', `Panel ${letters[i]}`);
     const picker = document.createElement('select');
     picker.setAttribute('aria-label', `Photo for panel ${letters[i]}`);
     const none = document.createElement('option');
@@ -156,11 +152,8 @@ function renderPanelRows() {
       state.panels[i].photo = Number(picker.value);
       redraw();
     });
-    head.append(title, picker);
-    const zoom = document.createElement('div');
-    zoom.className = 'zoom';
-    const zoomLabel = document.createElement('span');
-    zoomLabel.textContent = 'Zoom';
+    const head = el('div', 'row-head', title, picker);
+    const zoomLabel = el('span', null, 'Zoom');
     const slider = document.createElement('input');
     slider.type = 'range';
     slider.min = '1';
@@ -172,9 +165,8 @@ function renderPanelRows() {
       state.panels[i].zoom = Number(slider.value);
       redraw();
     });
-    const centre = document.createElement('button');
+    const centre = el('button', null, 'Centre');
     centre.type = 'button';
-    centre.textContent = 'Centre';
     centre.addEventListener('click', () => {
       state.panels[i].ox = 0;
       state.panels[i].oy = 0;
@@ -182,13 +174,13 @@ function renderPanelRows() {
       renderPanelRows();
       redraw();
     });
-    zoom.append(zoomLabel, slider, centre);
+    const zoom = el('div', 'zoom', zoomLabel, slider, centre);
     row.append(head, zoom);
     panelRowsEl.append(row);
   });
 }
 
-/** Binds a group of choice buttons (layout, grade, size) to one state field. */
+/** Binds one group of choice buttons (layout, grade or size) to a state field. */
 function bindChoices(id, field, apply) {
   const group = document.getElementById(id);
   group.querySelectorAll('button').forEach((btn) => {
@@ -219,7 +211,7 @@ subtitleInput.addEventListener('input', () => {
   redraw();
 });
 
-// Click selects a panel; drag pans its photo inside the panel.
+// Click a panel to select it; drag to pan its photo inside the panel.
 function panelAt(clientX, clientY) {
   const rect = canvas.getBoundingClientRect();
   const px = ((clientX - rect.left) / rect.width) * canvas.width;
@@ -246,17 +238,15 @@ canvas.addEventListener('pointermove', (e) => {
   const hit = panelAt(e.clientX, e.clientY);
   const panel = drag.panel;
   const rect = LAYOUTS[state.layout][state.panels.indexOf(panel)];
-  const dx = (hit.px - drag.lastX) / (rect.w * canvas.width);
-  const dy = (hit.py - drag.lastY) / (rect.h * canvas.height);
-  panel.ox += dx;
-  panel.oy += dy;
+  panel.ox += (hit.px - drag.lastX) / (rect.w * canvas.width);
+  panel.oy += (hit.py - drag.lastY) / (rect.h * canvas.height);
   drag.lastX = hit.px;
   drag.lastY = hit.py;
   redraw();
 });
 canvas.addEventListener('pointerup', () => { drag = null; });
 
-/** Exports the cover at the chosen size as a PNG file download. */
+/** Renders the cover at the chosen size and downloads it as a PNG. */
 export function exportCover() {
   const { w, h } = SIZES[state.size];
   const out = renderCover(state, w, h);
@@ -274,7 +264,8 @@ export function exportCover() {
 
 document.getElementById('export').addEventListener('click', exportCover);
 
-// Automation hooks for screenshots: the real exported PNG as a data URL.
+// Automation hooks used by the screenshot scenes: the real exported PNG as a
+// data URL, a whole-state patch, and a sample loader.
 window.__exportCover = async () => {
   const { w, h } = SIZES[state.size];
   return renderCover(state, w, h).toDataURL('image/png');
@@ -308,7 +299,7 @@ const shot = query.get('shot');
 if (shot) {
   runShot(shot, query, { state, loadImage, redraw, exportCover });
 } else {
-  // Load the fonts, then draw once so the caption uses Anton from the start.
+  // Load the display font first, so the caption uses Anton from the first paint.
   document.fonts.load('100px Anton').finally(() => redraw());
   redraw();
 }

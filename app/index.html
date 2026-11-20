@@ -3,14 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Sunset Cover Studio — turn your photos and a caption into multi-panel GTA-style cover art, offline in your browser, and export a PNG to share.">
 <title>Sunset Cover Studio — GTA-style cover art maker</title>
 <link rel="stylesheet" href="./style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23ff5e8a'/%3E%3Ccircle cx='8' cy='9' r='5' fill='%23ffb347'/%3E%3C/svg%3E">
 </head>
 <body>
 <main class="app">
   <section class="panel controls" aria-label="Cover controls">
     <h1>Sunset Cover Studio</h1>
-    <p class="tagline">Your photo + a caption, turned into multi-panel GTA-style cover art. Everything runs offline, in your browser — photos never leave your machine.</p>
+    <p class="tagline">Your photo and a caption, turned into multi-panel GTA-style cover art. It all runs offline in your browser — photos never leave your machine, and the PNG exports straight from the canvas.</p>
 
     <fieldset>
       <legend>1 · Photos</legend>
@@ -68,7 +70,7 @@
 
   <section class="preview" aria-label="Cover preview">
     <canvas id="cover" width="1080" height="1350"></canvas>
-    <p class="hint">Live preview — click a panel to select it, drag to move its photo.</p>
+    <p class="hint">Live preview — click a panel to select it, drag to move its photo. What you see is what the PNG will be.</p>
   </section>
 </main>
 <script type="module" src="./src/editor.js"></script>
