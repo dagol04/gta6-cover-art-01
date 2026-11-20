@@ -3,68 +3,68 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Sunset Cover Studio — turn photos and a caption into multi-panel GTA-style cover art, offline in your browser, and export a PNG to share.">
+<meta name="description" content="Sunset Cover Studio — turn your photos and a caption into multi-panel GTA-style cover art, offline in your browser, and export a PNG to share.">
 <title>Sunset Cover Studio — GTA-style cover art maker</title>
-<link rel="stylesheet" href="./style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23ff5e8a'/%3E%3Ccircle cx='8' cy='9' r='5' fill='%23ffb347'/%3E%3C/svg%3E">
+<link href="./style.css" rel="stylesheet">
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23ff5e8a'/%3E%3Ccircle cx='8' cy='9' r='5' fill='%23ffb347'/%3E%3C/svg%3E" rel="icon">
 </head>
 <body>
 <main class="app">
   <section class="panel controls" aria-label="Cover controls">
     <h1>Sunset Cover Studio</h1>
-    <p class="tagline">Turn a photo and a caption into multi-panel GTA-style cover art. Everything runs offline in your browser — photos never leave your machine, and the PNG exports straight from the canvas.</p>
+    <p class="tagline">Turn your photos and a caption into multi-panel GTA-style cover art. It runs entirely offline in your browser — your photos never leave your machine — and the PNG exports straight from the canvas.</p>
 
     <fieldset>
-      <legend>1 · Your photos</legend>
-      <p class="hint">Add up to three photos, or try a sample. Any panel can show any of them.</p>
+      <legend>1 · Photos</legend>
+      <p class="hint">Add up to three of your photos, or try a sample. Any panel can show any of them.</p>
       <div class="slots" id="slots"></div>
     </fieldset>
 
     <fieldset>
-      <legend>2 · Panel layout</legend>
+      <legend>2 · Layout</legend>
       <div class="choices" id="layouts">
-        <button type="button" data-layout="stack" class="choice is-on">Stack</button>
-        <button type="button" data-layout="grid" class="choice">Grid</button>
-        <button type="button" data-layout="strip" class="choice">Strip</button>
+        <button class="choice is-on" data-layout="stack" type="button">Stack</button>
+        <button class="choice" data-layout="grid" type="button">Grid</button>
+        <button class="choice" data-layout="strip" type="button">Strip</button>
       </div>
-      <p class="hint">Stack: one hero photo over two. Grid: four panels. Strip: three tall panels.</p>
+      <p class="hint">Stack puts one hero photo over two. Grid makes four panels. Strip makes three tall panels.</p>
     </fieldset>
 
     <fieldset>
-      <legend>3 · Panel photos</legend>
-      <p class="hint">Click a panel in the preview to pick it, then drag the photo inside it. Zoom and re-assign photos here.</p>
+      <legend>3 · Panels</legend>
+      <p class="hint">Click a panel in the preview to pick it, then drag its photo around. Zoom and swap photos here.</p>
       <div class="panel-rows" id="panelRows"></div>
     </fieldset>
 
     <fieldset>
-      <legend>4 · Caption words</legend>
+      <legend>4 · Words</legend>
       <label>Caption
-        <input id="caption" type="text" maxlength="48" value="Sunset Heist">
+        <input type="text" id="caption" maxlength="48" value="Sunset Heist">
       </label>
       <label>Subtitle
-        <input id="subtitle" type="text" maxlength="48" value="Neon Boulevard">
+        <input type="text" id="subtitle" maxlength="48" value="Neon Boulevard">
       </label>
     </fieldset>
 
     <fieldset>
       <legend>5 · Colour grade</legend>
       <div class="choices" id="grades">
-        <button type="button" data-grade="sunset" class="choice is-on">Sunset</button>
-        <button type="button" data-grade="neon" class="choice">Neon</button>
-        <button type="button" data-grade="dusk" class="choice">Dusk</button>
-        <button type="button" data-grade="noir" class="choice">Noir</button>
+        <button class="choice is-on" data-grade="sunset" type="button">Sunset</button>
+        <button class="choice" data-grade="neon" type="button">Neon</button>
+        <button class="choice" data-grade="dusk" type="button">Dusk</button>
+        <button class="choice" data-grade="noir" type="button">Noir</button>
       </div>
       <p class="hint">Sunset is warm, Neon is loud, Dusk is violet, Noir is black and white.</p>
     </fieldset>
 
     <fieldset>
-      <legend>6 · Export size</legend>
+      <legend>6 · Export</legend>
       <div class="choices" id="sizes">
-        <button type="button" data-size="1080x1080" class="choice">1080 × 1080</button>
-        <button type="button" data-size="1080x1350" class="choice is-on">1080 × 1350</button>
-        <button type="button" data-size="1920x1080" class="choice">1920 × 1080</button>
+        <button class="choice" data-size="1080x1080" type="button">1080 × 1080</button>
+        <button class="choice is-on" data-size="1080x1350" type="button">1080 × 1350</button>
+        <button class="choice" data-size="1920x1080" type="button">1920 × 1080</button>
       </div>
-      <button id="export" type="button" class="export">Export PNG</button>
+      <button class="export" id="export" type="button">Export PNG</button>
       <p id="status" role="status"></p>
     </fieldset>
   </section>

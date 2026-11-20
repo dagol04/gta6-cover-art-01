@@ -1,7 +1,7 @@
-// Sunset Cover Studio — hand-in program for the gta6-cover-art-01 bounty.
-// Node 22, standard library only. Copies this repo's app/ and screenshots/
-// into the output directory and writes /output/dossier.json using the
-// vendored make.fun library (the summary the judge reads).
+// Sunset Cover Studio — the hand-in program for the gta6-cover-art-01 bounty.
+// Node 22, standard library only. It copies this repo's app/ and screenshots/
+// into the output directory and writes /output/dossier.json with the vendored
+// make.fun library (the summary the judge reads).
 //
 // Try the app first with `node serve.ts`, then open http://localhost:8080.
 // Outside the grader, MAKEFUN_OUTPUT_DIR stands in for /output:
@@ -15,7 +15,7 @@ import { buildDossier } from './vendor/makefun-app.ts';
 // These caps mirror the scorer's own (see the kit's RULES.txt, "The gate"):
 // the dossier text is capped at 160 KiB, at most 4 screenshots of 256 KiB
 // each, and app/ stays within 993 files and 48 MiB in all.
-const DOSSIER_CAPS = {
+const GATE_CAPS = {
   text_max_bytes: 163840,
   screenshots: { max: 4, max_bytes: 262144 },
   app_max_files: 993,
@@ -23,8 +23,8 @@ const DOSSIER_CAPS = {
   app_path_max_bytes: 1000,
 };
 
-/** Stages the entry's app/ and screenshots/ into a fresh output directory. */
-function stageFiles(rootDir, outputDir) {
+/** Copies the entry's app/ and screenshots/ into a fresh output directory. */
+function copyEntry(rootDir, outputDir) {
   mkdirSync(outputDir, { recursive: true });
   cpSync(join(rootDir, 'app'), join(outputDir, 'app'), { recursive: true });
   mkdirSync(join(outputDir, 'screenshots'), { recursive: true });
@@ -33,8 +33,8 @@ function stageFiles(rootDir, outputDir) {
   }
 }
 
-const rootDir = fileURLToPath(new URL('.', import.meta.url));
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const repoRoot = fileURLToPath(new URL('.', import.meta.url));
+const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
-stageFiles(rootDir, outputDir);
-writeFileSync(join(outputDir, 'dossier.json'), buildDossier(outputDir, DOSSIER_CAPS));
+copyEntry(repoRoot, outDir);
+writeFileSync(join(outDir, 'dossier.json'), buildDossier(outDir, GATE_CAPS));

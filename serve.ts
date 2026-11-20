@@ -8,12 +8,14 @@ import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const appRoot = resolve(fileURLToPath(new URL('./app', import.meta.url)));
-const argv = process.argv.slice(2);
-const portFlag = argv.indexOf('--port');
-const wanted = portFlag === -1 ? 8080 : Number(argv[portFlag + 1]);
-const port = Number.isInteger(wanted) && wanted > 0 && wanted < 65536 ? wanted : 8080;
+const cliArgs = process.argv.slice(2);
+const portFlagAt = cliArgs.indexOf('--port');
+const askedPort = portFlagAt === -1 ? 8080 : Number(cliArgs[portFlagAt + 1]);
+const listenPort = Number.isInteger(askedPort) && askedPort > 0 && askedPort < 65536
+  ? askedPort
+  : 8080;
 
-const MIME = {
+const MEDIA_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -33,8 +35,16 @@ const MIME = {
   '.otf': 'font/otf',
 };
 
+/** Resolves a request path to a file inside app/, or null when it escapes. */
+function resolveInsideApp(pathname) {
+  if (pathname.endsWith('/')) pathname += 'index.html';
+  const file = resolve(join(appRoot, normalize(pathname)));
+  if (file !== appRoot && !file.startsWith(appRoot + sep)) return null;
+  return file;
+}
+
 /** Sends one file from app/ with its MIME type, or a 404 when it is missing. */
-function sendFile(file, request, response) {
+function serveFile(file, request, response) {
   let size;
   try {
     const stats = statSync(file);
@@ -45,7 +55,7 @@ function sendFile(file, request, response) {
     return;
   }
   response.writeHead(200, {
-    'content-type': MIME[extname(file).toLowerCase()] ?? 'application/octet-stream',
+    'content-type': MEDIA_TYPES[extname(file).toLowerCase()] ?? 'application/octet-stream',
     'content-length': size,
     'cache-control': 'no-store',
   });
@@ -56,7 +66,8 @@ function sendFile(file, request, response) {
   createReadStream(file).pipe(response);
 }
 
-createServer((request, response) => {
+/** Handles one request: only GET and HEAD, only files inside app/. */
+function handleRequest(request, response) {
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     response.writeHead(405, { 'allow': 'GET, HEAD' }).end('method not allowed');
     return;
@@ -69,13 +80,14 @@ createServer((request, response) => {
     response.writeHead(400).end('bad request');
     return;
   }
-  if (pathname.endsWith('/')) pathname += 'index.html';
-  const file = resolve(join(appRoot, normalize(pathname)));
-  if (file !== appRoot && !file.startsWith(appRoot + sep)) {
+  const file = resolveInsideApp(pathname);
+  if (!file) {
     response.writeHead(403).end('forbidden');
     return;
   }
-  sendFile(file, request, response);
-}).listen(port, '127.0.0.1', () => {
-  console.log(`Sunset Cover Studio is on http://localhost:${port} — open it in desktop Chrome`);
+  serveFile(file, request, response);
+}
+
+createServer(handleRequest).listen(listenPort, '127.0.0.1', () => {
+  console.log(`Sunset Cover Studio is on http://localhost:${listenPort} — open it in desktop Chrome`);
 });
