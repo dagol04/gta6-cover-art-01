@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/gta6-cover-art-01/dagol04/gta6-cover-art-01/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 [![reward](https://make.fun/badge/gta6-cover-art-01/dagol04/gta6-cover-art-01/reward.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 
-Sunset Cover Studio turns your photos and a caption into GTA-style cover art. Arrange photos in multi-panel layouts (Stack, Grid, Strip), drag to crop and position each one, write your caption, pick a Vice City sunset colour grade, and export a PNG in 1080 × 1080, 1080 × 1350 or 1920 × 1080. It runs entirely offline in the browser, so your photos never leave your machine. The cover is drawn on canvas — a retro slatted sun, palm silhouettes, and big condensed Anton lettering (SIL OFL) — an original design with no Rockstar logo, artwork or font.
+Sunset Cover Studio makes GTA-style cover art from your photos and a caption. Pick a multi-panel layout (Stack, Grid, Strip), drag each photo to crop and place it, write your caption, choose a Vice City sunset colour grade, and export a PNG at 1080 × 1080, 1080 × 1350 or 1920 × 1080. It runs fully offline in the browser, so photos never leave your machine. The cover is painted on canvas — a retro slatted sun, palm silhouettes, and big condensed Anton lettering (SIL OFL) — an original design with no Rockstar logo, artwork or font.
 
 ## Run it
 

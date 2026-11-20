@@ -1,4 +1,4 @@
-/* Sunset Cover Studio — dark neon editor chrome. The cover itself is drawn on canvas. */
+/* Sunset Cover Studio — dark neon editor chrome. The cover itself is painted on canvas. */
 @font-face {
   font-family: 'Anton';
   src: url('./fonts/Anton-Regular.ttf') format('truetype');
@@ -12,19 +12,19 @@
 html, body {
   margin: 0;
   min-height: 100%;
-  background: #12081f;
-  color: #f4eefc;
+  background: rgb(18, 8, 31);
+  color: rgb(244, 238, 252);
   font: 15px/1.45 system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 .app {
   display: flex;
-  gap: 28px;
+  gap: 1.75rem;
   align-items: flex-start;
   justify-content: center;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 1.5rem;
 }
 
 .controls {
@@ -32,11 +32,11 @@ html, body {
   flex: 0 0 360px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  background: #1d0f33;
-  border: 1px solid #3a1d63;
-  border-radius: 14px;
-  padding: 20px;
+  gap: 1rem;
+  background: rgb(29, 15, 51);
+  border: 1px solid rgb(58, 29, 99);
+  border-radius: 0.875rem;
+  padding: 1.25rem;
 }
 
 .controls h1 {
@@ -46,158 +46,158 @@ html, body {
   font-weight: 400;
   letter-spacing: 1px;
   text-transform: uppercase;
-  background: linear-gradient(100deg, #ffb347, #ff5e8a 55%, #b967ff);
+  background: linear-gradient(100deg, rgb(255, 179, 71), rgb(255, 94, 138) 55%, rgb(185, 103, 255));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-.tagline { margin: 0; color: #cbb8e8; font-size: 13.5px; }
+.tagline { margin: 0; color: rgb(203, 184, 232); font-size: 13.5px; }
 
 fieldset {
-  border: 1px solid #3a1d63;
-  border-radius: 10px;
-  padding: 12px;
+  border: 1px solid rgb(58, 29, 99);
+  border-radius: 0.625rem;
+  padding: 0.75rem;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.625rem;
 }
 
 legend {
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.4px;
-  color: #ffb347;
-  padding: 0 6px;
+  color: rgb(255, 179, 71);
+  padding: 0 0.375rem;
 }
 
-.hint { margin: 0; color: #a894c9; font-size: 12.5px; }
+.hint { margin: 0; color: rgb(168, 148, 201); font-size: 12.5px; }
 
 label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.375rem;
   font-weight: 600;
   font-size: 13px;
 }
 
 input[type='text'] {
   font: inherit;
-  color: #f4eefc;
-  background: #12081f;
-  border: 1px solid #5a3a8a;
-  border-radius: 8px;
-  padding: 9px 10px;
+  color: rgb(244, 238, 252);
+  background: rgb(18, 8, 31);
+  border: 1px solid rgb(90, 58, 138);
+  border-radius: 0.5rem;
+  padding: 9px 0.625rem;
 }
 
-input[type='text']:focus { outline: 2px solid #ff5e8a; outline-offset: 1px; }
+input[type='text']:focus { outline: 2px solid rgb(255, 94, 138); outline-offset: 1px; }
 
 button:focus-visible, select:focus-visible, input[type='range']:focus-visible {
-  outline: 2px solid #ffb347;
+  outline: 2px solid rgb(255, 179, 71);
   outline-offset: 2px;
 }
 
-.choices { display: flex; gap: 8px; flex-wrap: wrap; }
+.choices { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
 .choice {
   font: inherit;
   font-weight: 700;
   font-size: 13px;
-  color: #e8ddf8;
-  background: #2a1847;
-  border: 1px solid #5a3a8a;
+  color: rgb(232, 221, 248);
+  background: rgb(42, 24, 71);
+  border: 1px solid rgb(90, 58, 138);
   border-radius: 999px;
   padding: 7px 13px;
   cursor: pointer;
 }
 
-.choice:hover { border-color: #ff5e8a; }
-.choice.is-on { background: #ff5e8a; border-color: #ff5e8a; color: #fff; }
+.choice:hover { border-color: rgb(255, 94, 138); }
+.choice.is-on { background: rgb(255, 94, 138); border-color: rgb(255, 94, 138); color: rgb(255, 255, 255); }
 
-.slots { display: flex; flex-direction: column; gap: 10px; }
+.slots { display: flex; flex-direction: column; gap: 0.625rem; }
 
 .slot {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #12081f;
-  border: 1px dashed #5a3a8a;
-  border-radius: 10px;
-  padding: 8px;
+  gap: 0.625rem;
+  background: rgb(18, 8, 31);
+  border: 1px dashed rgb(90, 58, 138);
+  border-radius: 0.625rem;
+  padding: 0.5rem;
 }
 
 .slot img {
   width: 56px;
   height: 56px;
   object-fit: cover;
-  border-radius: 6px;
-  background: #2a1847;
+  border-radius: 0.375rem;
+  background: rgb(42, 24, 71);
   flex: 0 0 56px;
 }
 
-.slot .slot-body { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.slot .slot-body { flex: 1; display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
 .slot .slot-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.slot .slot-actions { display: flex; gap: 6px; }
+.slot .slot-actions { display: flex; gap: 0.375rem; }
 
 .slot button, .panel-row button {
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #e8ddf8;
-  background: #2a1847;
-  border: 1px solid #5a3a8a;
-  border-radius: 6px;
+  color: rgb(232, 221, 248);
+  background: rgb(42, 24, 71);
+  border: 1px solid rgb(90, 58, 138);
+  border-radius: 0.375rem;
   padding: 5px 9px;
   cursor: pointer;
 }
 
-.slot button:hover, .panel-row button:hover { border-color: #ff5e8a; }
+.slot button:hover, .panel-row button:hover { border-color: rgb(255, 94, 138); }
 .slot input[type='file'] { display: none; }
 
-.panel-rows { display: flex; flex-direction: column; gap: 10px; }
+.panel-rows { display: flex; flex-direction: column; gap: 0.625rem; }
 
 .panel-row {
-  background: #12081f;
-  border: 1px solid #3a1d63;
-  border-radius: 10px;
-  padding: 10px;
+  background: rgb(18, 8, 31);
+  border: 1px solid rgb(58, 29, 99);
+  border-radius: 0.625rem;
+  padding: 0.625rem;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
-.panel-row.is-selected { border-color: #ffb347; box-shadow: 0 0 0 1px #ffb347; }
+.panel-row.is-selected { border-color: rgb(255, 179, 71); box-shadow: 0 0 0 1px rgb(255, 179, 71); }
 
-.panel-row .row-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.panel-row .row-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .panel-row .row-title { font-weight: 700; font-size: 13px; }
 .panel-row select {
   font: inherit;
   font-size: 13px;
-  color: #f4eefc;
-  background: #2a1847;
-  border: 1px solid #5a3a8a;
-  border-radius: 6px;
-  padding: 6px;
+  color: rgb(244, 238, 252);
+  background: rgb(42, 24, 71);
+  border: 1px solid rgb(90, 58, 138);
+  border-radius: 0.375rem;
+  padding: 0.375rem;
 }
-.panel-row .zoom { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #cbb8e8; }
-.panel-row input[type='range'] { flex: 1; accent-color: #ff5e8a; }
+.panel-row .zoom { display: flex; align-items: center; gap: 0.5rem; font-size: 12.5px; color: rgb(203, 184, 232); }
+.panel-row input[type='range'] { flex: 1; accent-color: rgb(255, 94, 138); }
 
 .export {
   font: inherit;
   font-weight: 800;
-  font-size: 16px;
-  color: #1d0f33;
-  background: linear-gradient(100deg, #ffb347, #ff5e8a);
+  font-size: 1rem;
+  color: rgb(29, 15, 51);
+  background: linear-gradient(100deg, rgb(255, 179, 71), rgb(255, 94, 138));
   border: 0;
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 0.625rem;
+  padding: 0.75rem;
   cursor: pointer;
 }
 
 .export:hover { filter: brightness(1.1); }
 
-#status { margin: 0; min-height: 1.2em; color: #8fe3b0; font-size: 13px; }
+#status { margin: 0; min-height: 1.2em; color: rgb(143, 227, 176); font-size: 13px; }
 
 .preview {
   flex: 1;
@@ -205,9 +205,9 @@ button:focus-visible, select:focus-visible, input[type='range']:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 0.625rem;
   position: sticky;
-  top: 24px;
+  top: 1.5rem;
 }
 
 .preview canvas {
@@ -215,8 +215,8 @@ button:focus-visible, select:focus-visible, input[type='range']:focus-visible {
   max-height: calc(100vh - 90px);
   width: auto;
   height: auto;
-  border-radius: 6px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), 0 0 0 1px #3a1d63;
+  border-radius: 0.375rem;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), 0 0 0 1px rgb(58, 29, 99);
   cursor: crosshair;
 }
 

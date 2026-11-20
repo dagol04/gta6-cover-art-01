@@ -40,7 +40,7 @@ export function loadImage(url) {
   });
 }
 
-/** Redraws the live preview at the chosen export size. */
+/** Repaints the live preview at the chosen export size. */
 function redraw() {
   const { w, h } = SIZES[state.size];
   if (canvas.width !== w || canvas.height !== h) {
@@ -50,12 +50,12 @@ function redraw() {
   drawCover(canvas, state);
 }
 
-function setStatus(text) {
+function showStatus(text) {
   statusEl.textContent = text;
 }
 
-/** Small DOM helper: an element with a class and children. */
-function el(tag, className, ...children) {
+/** Tiny DOM helper: an element with a class and children. */
+function makeEl(tag, className, ...children) {
   const node = document.createElement(tag);
   if (className) node.className = className;
   for (const child of children) {
@@ -64,77 +64,81 @@ function el(tag, className, ...children) {
   return node;
 }
 
-/** Rebuilds the three photo slot cards: thumbnail, name, upload / sample buttons. */
-function renderSlots() {
+/** A small action button for a photo slot. */
+function slotButton(label, onClick) {
+  const btn = makeEl('button', null, label);
+  btn.type = 'button';
+  btn.addEventListener('click', onClick);
+  return btn;
+}
+
+/** Builds the three photo slot cards: thumbnail, name, upload / sample buttons. */
+function buildSlots() {
   slotsEl.innerHTML = '';
   state.photos.forEach((photo, i) => {
-    const thumb = el('img');
+    const thumb = makeEl('img');
     thumb.alt = `Photo ${i + 1}`;
     thumb.src = photo
       ? photo.src
       : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-    const name = el('div', 'slot-name', `Photo ${i + 1} — ${state.photoNames[i]}`);
+    const name = makeEl('div', 'slot-name', `Photo ${i + 1} — ${state.photoNames[i]}`);
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
     fileInput.id = `photo-file-${i}`;
-    const uploadBtn = el('button', null, 'Upload');
-    uploadBtn.type = 'button';
-    uploadBtn.addEventListener('click', () => fileInput.click());
+    const uploadBtn = slotButton('Upload', () => fileInput.click());
     fileInput.addEventListener('change', async () => {
       const file = fileInput.files[0];
       if (!file) return;
       try {
         state.photos[i] = await loadImage(URL.createObjectURL(file));
         state.photoNames[i] = file.name;
-        autoAssign(i);
-        renderSlots();
-        renderPanelRows();
+        assignEmpty(i);
+        buildSlots();
+        buildPanelRows();
         redraw();
-        setStatus(`Photo ${i + 1} loaded.`);
+        showStatus(`Photo ${i + 1} loaded.`);
       } catch {
-        setStatus(`Could not read ${file.name}.`);
+        showStatus(`Could not read ${file.name}.`);
       }
     });
-    const sampleBtn = el('button', null, 'Sample');
-    sampleBtn.type = 'button';
-    sampleBtn.addEventListener('click', async () => {
+    const sampleBtn = slotButton('Sample', async () => {
       const sample = SAMPLES[i % SAMPLES.length];
       try {
         state.photos[i] = await loadImage(`samples/${sample.file}`);
         state.photoNames[i] = sample.label;
-        autoAssign(i);
-        renderSlots();
-        renderPanelRows();
+        assignEmpty(i);
+        buildSlots();
+        buildPanelRows();
         redraw();
-        setStatus(`Sample photo ${i + 1} loaded.`);
+        showStatus(`Sample photo ${i + 1} loaded.`);
       } catch {
-        setStatus('Sample photo failed to load.');
+        showStatus('Sample photo failed to load.');
       }
     });
-    const actions = el('div', 'slot-actions', uploadBtn, sampleBtn);
-    const body = el('div', 'slot-body', name, actions);
-    slotsEl.append(el('div', 'slot', thumb, body, fileInput));
+    const actions = makeEl('div', 'slot-actions', uploadBtn, sampleBtn);
+    const body = makeEl('div', 'slot-body', name, actions);
+    slotsEl.append(makeEl('div', 'slot', thumb, body, fileInput));
   });
 }
 
-/** Drops a newly loaded photo into the first empty panel, if there is one. */
-function autoAssign(photoIndex) {
+/** Drops a newly loaded photo into the first vacant panel, if there is one. */
+function assignEmpty(photoIndex) {
   const empty = state.panels.findIndex((p) => p.photo === -1);
   if (empty !== -1) state.panels[empty].photo = photoIndex;
 }
 
-/** Rebuilds the per-panel rows: photo picker, zoom slider, centre button. */
-function renderPanelRows() {
+/** Builds the per-panel rows: photo picker, zoom slider, centre button. */
+function buildPanelRows() {
   panelRowsEl.innerHTML = '';
   const letters = ['A', 'B', 'C', 'D'];
   state.panels.forEach((panel, i) => {
-    const row = el('div', `panel-row${i === selectedPanel ? ' is-selected' : ''}`);
+    const row = makeEl('div', `panel-row${i === selectedPanel ? ' is-selected' : ''}`);
     row.addEventListener('click', () => {
       selectedPanel = i;
-      renderPanelRows();
+      buildPanelRows();
     });
-    const title = el('span', 'row-title', `Panel ${letters[i]}`);
+    const title = makeEl('span', 'row-title', `Panel ${letters[i]}`);
     const picker = document.createElement('select');
     picker.setAttribute('aria-label', `Photo for panel ${letters[i]}`);
     const none = document.createElement('option');
@@ -152,8 +156,8 @@ function renderPanelRows() {
       state.panels[i].photo = Number(picker.value);
       redraw();
     });
-    const head = el('div', 'row-head', title, picker);
-    const zoomLabel = el('span', null, 'Zoom');
+    const head = makeEl('div', 'row-head', title, picker);
+    const zoomLabel = makeEl('span', null, 'Zoom');
     const slider = document.createElement('input');
     slider.type = 'range';
     slider.min = '1';
@@ -165,23 +169,23 @@ function renderPanelRows() {
       state.panels[i].zoom = Number(slider.value);
       redraw();
     });
-    const centre = el('button', null, 'Centre');
+    const centre = makeEl('button', null, 'Centre');
     centre.type = 'button';
     centre.addEventListener('click', () => {
       state.panels[i].ox = 0;
       state.panels[i].oy = 0;
       state.panels[i].zoom = 1;
-      renderPanelRows();
+      buildPanelRows();
       redraw();
     });
-    const zoom = el('div', 'zoom', zoomLabel, slider, centre);
+    const zoom = makeEl('div', 'zoom', zoomLabel, slider, centre);
     row.append(head, zoom);
     panelRowsEl.append(row);
   });
 }
 
-/** Binds one group of choice buttons (layout, grade or size) to a state field. */
-function bindChoices(id, field, apply) {
+/** Wires one group of choice buttons (layout, grade or size) to a state field. */
+function wireChoices(id, field, apply) {
   const group = document.getElementById(id);
   group.querySelectorAll('button').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -193,14 +197,14 @@ function bindChoices(id, field, apply) {
   });
 }
 
-bindChoices('layouts', 'layout', () => {
+wireChoices('layouts', 'layout', () => {
   state.panels = panelsFor(state.layout, state.panels);
   selectedPanel = 0;
-  renderPanelRows();
+  buildPanelRows();
   redraw();
 });
-bindChoices('grades', 'grade', redraw);
-bindChoices('sizes', 'size', redraw);
+wireChoices('grades', 'grade', redraw);
+wireChoices('sizes', 'size', redraw);
 
 captionInput.addEventListener('input', () => {
   state.caption = captionInput.value;
@@ -212,7 +216,7 @@ subtitleInput.addEventListener('input', () => {
 });
 
 // Click a panel to select it; drag to pan its photo inside the panel.
-function panelAt(clientX, clientY) {
+function panelHit(clientX, clientY) {
   const rect = canvas.getBoundingClientRect();
   const px = ((clientX - rect.left) / rect.width) * canvas.width;
   const py = ((clientY - rect.top) / rect.height) * canvas.height;
@@ -226,16 +230,16 @@ function panelAt(clientX, clientY) {
 
 let drag = null;
 canvas.addEventListener('pointerdown', (e) => {
-  const hit = panelAt(e.clientX, e.clientY);
+  const hit = panelHit(e.clientX, e.clientY);
   if (hit.index === -1) return;
   selectedPanel = hit.index;
-  renderPanelRows();
+  buildPanelRows();
   canvas.setPointerCapture(e.pointerId);
   drag = { panel: state.panels[hit.index], lastX: hit.px, lastY: hit.py };
 });
 canvas.addEventListener('pointermove', (e) => {
   if (!drag) return;
-  const hit = panelAt(e.clientX, e.clientY);
+  const hit = panelHit(e.clientX, e.clientY);
   const panel = drag.panel;
   const rect = LAYOUTS[state.layout][state.panels.indexOf(panel)];
   panel.ox += (hit.px - drag.lastX) / (rect.w * canvas.width);
@@ -246,7 +250,7 @@ canvas.addEventListener('pointermove', (e) => {
 });
 canvas.addEventListener('pointerup', () => { drag = null; });
 
-/** Renders the cover at the chosen size and downloads it as a PNG. */
+/** Paints the cover at the chosen size and downloads it as a PNG. */
 export function exportCover() {
   const { w, h } = SIZES[state.size];
   const out = renderCover(state, w, h);
@@ -256,7 +260,7 @@ export function exportCover() {
       a.href = URL.createObjectURL(blob);
       a.download = `cover-${state.size}.png`;
       a.click();
-      setStatus(`Saved cover-${state.size}.png`);
+      showStatus(`Saved cover-${state.size}.png`);
       resolve(blob);
     }, 'image/png');
   });
@@ -278,21 +282,21 @@ window.__setState = (patch) => {
   document.querySelectorAll('#layouts .choice').forEach((b) => b.classList.toggle('is-on', b.dataset.layout === state.layout));
   document.querySelectorAll('#grades .choice').forEach((b) => b.classList.toggle('is-on', b.dataset.grade === state.grade));
   document.querySelectorAll('#sizes .choice').forEach((b) => b.classList.toggle('is-on', b.dataset.size === state.size));
-  renderSlots();
-  renderPanelRows();
+  buildSlots();
+  buildPanelRows();
   redraw();
 };
 window.__loadSample = async (slot, file, label) => {
   state.photos[slot] = await loadImage(`samples/${file}`);
   state.photoNames[slot] = label;
-  autoAssign(slot);
-  renderSlots();
-  renderPanelRows();
+  assignEmpty(slot);
+  buildSlots();
+  buildPanelRows();
   redraw();
 };
 
-renderSlots();
-renderPanelRows();
+buildSlots();
+buildPanelRows();
 
 const query = new URLSearchParams(location.search);
 const shot = query.get('shot');

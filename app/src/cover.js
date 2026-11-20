@@ -1,12 +1,12 @@
-// Sunset Cover Studio — the cover renderer (rebuilt for the gta6-cover-art-01 entry).
-// Draws a multi-panel GTA-style poster onto a canvas: photo panels, a Vice City
-// sunset band with a slatted retro sun and palm silhouettes, and big condensed
-// caption lettering. Own design throughout — no Rockstar logo, artwork or font;
-// the display face is Anton (SIL OFL), loaded by the page.
+// Sunset Cover Studio — cover painter (rebuilt for the gta6-cover-art-01 entry).
+// Paints a multi-panel GTA-style poster on a canvas: photo panels, a Vice City
+// sunset strip with a slatted retro sun and palm silhouettes, plus big condensed
+// caption type. All original — no Rockstar logo, artwork or font; the display
+// face is Anton (SIL OFL), loaded by the page.
 
-// Panel rectangles as fractions of the cover, one list per layout.
+// Panel boxes as fractions of the cover, one array per layout.
 export const LAYOUTS = {
-  // One hero photo over two smaller ones.
+  // A hero photo above two smaller ones.
   stack: [
     { x: 0, y: 0, w: 1, h: 0.6 },
     { x: 0, y: 0.6, w: 0.5, h: 0.4 },
@@ -27,8 +27,15 @@ export const LAYOUTS = {
   ],
 };
 
-// Colour grades: a CSS filter applied to the photos, plus a translucent wash
-// laid over the finished cover for a unified colour mood.
+// The three post sizes the app exports.
+export const SIZES = {
+  '1080x1080': { w: 1080, h: 1080 },
+  '1080x1350': { w: 1080, h: 1350 },
+  '1920x1080': { w: 1920, h: 1080 },
+};
+
+// Colour grades: a CSS filter for the photos, and a translucent tint washed
+// over the finished cover for one unified colour mood.
 export const GRADES = {
   sunset: {
     filter: 'saturate(1.35) contrast(1.08) sepia(0.18) hue-rotate(-8deg) brightness(1.02)',
@@ -48,19 +55,12 @@ export const GRADES = {
   },
 };
 
-// The three post sizes the app exports.
-export const SIZES = {
-  '1080x1080': { w: 1080, h: 1080 },
-  '1080x1350': { w: 1080, h: 1350 },
-  '1920x1080': { w: 1920, h: 1080 },
-};
-
-/** A panel with no photo: centred, at natural zoom. */
+/** A panel holding no photo: centred, at natural zoom. */
 export function blankPanel() {
   return { photo: -1, zoom: 1, ox: 0, oy: 0 };
 }
 
-/** Panels for a layout, carrying over any photo assignments the old panels had. */
+/** Panels for a layout, keeping any photo choices the previous panels held. */
 export function panelsFor(layout, previous) {
   const rects = LAYOUTS[layout] || LAYOUTS.stack;
   return rects.map((_, i) => {
@@ -73,8 +73,8 @@ function clamp(value, lo, hi) {
   return value < lo ? lo : value > hi ? hi : value;
 }
 
-/** Pixel rectangles for a layout on a cover of size w x h, with thin gaps. */
-function layoutRects(layout, w, h) {
+/** Pixel boxes for a layout on a cover of w by h, with thin gaps between panels. */
+function panelRects(layout, w, h) {
   const gap = Math.max(5, Math.round(w * 0.006));
   const half = gap / 2;
   return (LAYOUTS[layout] || LAYOUTS.stack).map((r) => {
@@ -91,8 +91,8 @@ function layoutRects(layout, w, h) {
   });
 }
 
-/** An empty panel: deep violet with a diagonal hatch and an ADD A PHOTO label. */
-function paintEmptyPanel(ctx, rect) {
+/** A vacant panel: deep violet, diagonal hatch, and an ADD A PHOTO label. */
+function drawEmptyPanel(ctx, rect) {
   const { x, y, w, h } = rect;
   const g = ctx.createLinearGradient(x, y, x + w, y + h);
   g.addColorStop(0, '#3a1d63');
@@ -121,15 +121,15 @@ function paintEmptyPanel(ctx, rect) {
   ctx.textBaseline = 'alphabetic';
 }
 
-/** A photo drawn cover-fit into a panel, with zoom and pan offsets applied. */
-function paintPhoto(ctx, photo, rect, panel, filter) {
+/** A photo fitted to fill a panel, with its zoom and pan offsets applied. */
+function drawPhoto(ctx, photo, rect, panel, filter) {
   const { x, y, w, h } = rect;
   const iw = photo.naturalWidth || photo.width;
   const ih = photo.naturalHeight || photo.height;
   const scale = Math.max(w / iw, h / ih) * panel.zoom;
   const dw = iw * scale;
   const dh = ih * scale;
-  // Offsets are fractions of the panel; clamp them so the photo never leaves a gap.
+  // Pan is a fraction of the panel; clamp it so the photo never leaves a gap.
   const maxOx = Math.max(0, (dw - w) / 2 / w);
   const maxOy = Math.max(0, (dh - h) / 2 / h);
   const ox = clamp(panel.ox, -maxOx, maxOx) * w;
@@ -142,7 +142,7 @@ function paintPhoto(ctx, photo, rect, panel, filter) {
   ctx.drawImage(photo, x + (w - dw) / 2 + ox, y + (h - dh) / 2 + oy, dw, dh);
   ctx.restore();
   ctx.filter = 'none';
-  // A warm dusk shade rising from the panel's foot, so panels sit together.
+  // A warm dusk shade climbing from the panel's foot, so panels sit together.
   const shade = ctx.createLinearGradient(0, y + h * 0.55, 0, y + h);
   shade.addColorStop(0, 'rgba(255, 90, 60, 0)');
   shade.addColorStop(1, 'rgba(120, 20, 90, 0.28)');
@@ -151,7 +151,7 @@ function paintPhoto(ctx, photo, rect, panel, filter) {
 }
 
 /** One palm silhouette: a leaning trunk and seven arcing fronds from its crown. */
-function paintPalm(ctx, bx, by, size, mirror) {
+function drawPalm(ctx, bx, by, size, mirror) {
   ctx.save();
   ctx.translate(bx, by);
   ctx.scale(mirror, 1);
@@ -166,7 +166,7 @@ function paintPalm(ctx, bx, by, size, mirror) {
   ctx.stroke();
   const crownX = size * 0.15;
   const crownY = -size * 0.92;
-  // Fronds fan out from the crown: each one rises, then droops toward its tip.
+  // Fronds fan from the crown: each rises, then droops toward its tip.
   ctx.lineWidth = size * 0.032;
   for (let i = 0; i < 7; i++) {
     const angle = -Math.PI * (0.06 + (i / 6) * 0.88);
@@ -190,8 +190,8 @@ function paintPalm(ctx, bx, by, size, mirror) {
   ctx.restore();
 }
 
-/** The retro sun: a warm radial disc with horizontal slats cut from its lower half. */
-function paintSun(ctx, cx, cy, r) {
+/** The retro sun: a warm radial disc with slats cut from its lower half. */
+function drawSun(ctx, cx, cy, r) {
   const g = ctx.createRadialGradient(cx, cy - r * 0.25, r * 0.1, cx, cy, r);
   g.addColorStop(0, '#fff3b0');
   g.addColorStop(0.45, '#ffb347');
@@ -203,7 +203,7 @@ function paintSun(ctx, cx, cy, r) {
   ctx.clip();
   ctx.fillStyle = g;
   ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-  // Slats: sky-coloured bars that widen toward the bottom of the disc.
+  // Slats: sky-coloured bars widening toward the bottom of the disc.
   ctx.fillStyle = '#2a0f45';
   let y = cy + r * 0.08;
   let gap = r * 0.045;
@@ -215,8 +215,8 @@ function paintSun(ctx, cx, cy, r) {
   ctx.restore();
 }
 
-/** The largest Anton size at which the caption still fits maxWidth. */
-function fitCaption(ctx, text, maxWidth, startSize) {
+/** The biggest Anton size at which the caption still fits maxWidth. */
+function fitText(ctx, text, maxWidth, startSize) {
   let size = startSize;
   ctx.font = `${size}px Anton, 'Arial Narrow', sans-serif`;
   while (size > 24 && ctx.measureText(text).width > maxWidth) {
@@ -226,33 +226,8 @@ function fitCaption(ctx, text, maxWidth, startSize) {
   return size;
 }
 
-/**
- * Draws the whole cover onto a canvas: panels, the sunset band with its sun and
- * palms, the caption and subtitle, then the grade wash and a thin frame.
- * `state` holds layout, grade, caption, subtitle, photos and panels.
- */
-export function drawCover(canvas, state) {
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width;
-  const h = canvas.height;
-  const grade = GRADES[state.grade] || GRADES.sunset;
-  const rects = layoutRects(state.layout, w, h);
-
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#12081f';
-  ctx.fillRect(0, 0, w, h);
-
-  rects.forEach((rect, i) => {
-    const panel = state.panels[i] || blankPanel();
-    const photo = panel.photo >= 0 ? state.photos[panel.photo] : null;
-    if (photo) {
-      paintPhoto(ctx, photo, rect, panel, grade.filter);
-    } else {
-      paintEmptyPanel(ctx, rect);
-    }
-  });
-
-  // The sunset band across the foot of the cover.
+/** The sunset strip across the foot of the cover, with its sun and palms. */
+function drawSunsetBand(ctx, w, h) {
   const bandH = h * 0.22;
   const bandY = h - bandH;
   const sky = ctx.createLinearGradient(0, bandY, 0, h);
@@ -262,59 +237,92 @@ export function drawCover(canvas, state) {
   sky.addColorStop(1, 'rgba(255, 94, 138, 0.92)');
   ctx.fillStyle = sky;
   ctx.fillRect(0, bandY, w, bandH);
-
   const sunR = bandH * 0.62;
-  paintSun(ctx, w * 0.5, bandY + bandH * 0.52, sunR);
-
-  // Palms frame the caption at the band's edges.
+  drawSun(ctx, w * 0.5, bandY + bandH * 0.52, sunR);
+  // Palms frame the caption at the strip's edges.
   const palmH = bandH * 1.25;
-  paintPalm(ctx, w * 0.045, h - bandH * 0.06, palmH, 1);
-  paintPalm(ctx, w * 0.955, h - bandH * 0.06, palmH * 0.92, -1);
+  drawPalm(ctx, w * 0.045, h - bandH * 0.06, palmH, 1);
+  drawPalm(ctx, w * 0.955, h - bandH * 0.06, palmH * 0.92, -1);
+  return { bandH, bandY };
+}
 
-  // Caption: big condensed capitals, a sunset gradient fill, a dark edge.
-  const caption = (state.caption || '').trim().toUpperCase();
-  if (caption) {
-    const size = fitCaption(ctx, caption, w * 0.86, h * 0.105);
-    ctx.font = `${size}px Anton, 'Arial Narrow', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.save();
-    ctx.translate(w / 2, bandY + bandH * 0.46);
-    ctx.transform(1, 0, -0.06, 1, 0, 0);
-    const fill = ctx.createLinearGradient(0, -size / 2, 0, size / 2);
-    fill.addColorStop(0, '#fffbe8');
-    fill.addColorStop(0.55, '#ffe9a8');
-    fill.addColorStop(1, '#ff9e57');
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#22083a';
-    ctx.lineWidth = size * 0.09;
-    ctx.strokeText(caption, 0, 0);
-    ctx.fillStyle = fill;
-    ctx.shadowColor = 'rgba(20, 4, 40, 0.55)';
-    ctx.shadowBlur = size * 0.12;
-    ctx.shadowOffsetY = size * 0.03;
-    ctx.fillText(caption, 0, 0);
-    ctx.restore();
-  }
+/** The caption: big condensed capitals, a sunset gradient fill, a dark edge. */
+function drawCaption(ctx, w, h, bandY, bandH, caption) {
+  const text = (caption || '').trim().toUpperCase();
+  if (!text) return;
+  const size = fitText(ctx, text, w * 0.86, h * 0.105);
+  ctx.font = `${size}px Anton, 'Arial Narrow', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.save();
+  ctx.translate(w / 2, bandY + bandH * 0.46);
+  ctx.transform(1, 0, -0.06, 1, 0, 0);
+  const fill = ctx.createLinearGradient(0, -size / 2, 0, size / 2);
+  fill.addColorStop(0, '#fffbe8');
+  fill.addColorStop(0.55, '#ffe9a8');
+  fill.addColorStop(1, '#ff9e57');
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#22083a';
+  ctx.lineWidth = size * 0.09;
+  ctx.strokeText(text, 0, 0);
+  ctx.fillStyle = fill;
+  ctx.shadowColor = 'rgba(20, 4, 40, 0.55)';
+  ctx.shadowBlur = size * 0.12;
+  ctx.shadowOffsetY = size * 0.03;
+  ctx.fillText(text, 0, 0);
+  ctx.restore();
+}
 
-  // Subtitle: small tracked capitals under the caption.
-  const subtitle = (state.subtitle || '').trim().toUpperCase();
-  if (subtitle) {
-    const subSize = Math.max(14, h * 0.021);
-    ctx.font = `700 ${subSize}px system-ui, sans-serif`;
-    try { ctx.letterSpacing = `${Math.max(3, subSize * 0.32)}px`; } catch { /* older canvas: no tracking */ }
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(255, 240, 248, 0.95)';
-    ctx.shadowColor = 'rgba(20, 4, 40, 0.6)';
-    ctx.shadowBlur = subSize * 0.3;
-    ctx.fillText(subtitle, w / 2, bandY + bandH * 0.86);
-    ctx.shadowBlur = 0;
-    try { ctx.letterSpacing = '0px'; } catch { /* ignore */ }
-    ctx.textBaseline = 'alphabetic';
-  }
+/** The subtitle: small tracked capitals under the caption. */
+function drawSubtitle(ctx, w, h, bandY, bandH, subtitle) {
+  const text = (subtitle || '').trim().toUpperCase();
+  if (!text) return;
+  const subSize = Math.max(14, h * 0.021);
+  ctx.font = `700 ${subSize}px system-ui, sans-serif`;
+  try { ctx.letterSpacing = `${Math.max(3, subSize * 0.32)}px`; } catch { /* older canvas: no tracking */ }
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(255, 240, 248, 0.95)';
+  ctx.shadowColor = 'rgba(20, 4, 40, 0.6)';
+  ctx.shadowBlur = subSize * 0.3;
+  ctx.fillText(text, w / 2, bandY + bandH * 0.86);
+  ctx.shadowBlur = 0;
+  try { ctx.letterSpacing = '0px'; } catch { /* ignore */ }
+  ctx.textBaseline = 'alphabetic';
+}
 
-  // Grade wash, then a thin white frame to finish.
+/**
+ * Paints the whole cover on a canvas: panels, the sunset strip with its sun and
+ * palms, the caption and subtitle, then the grade tint and a thin frame.
+ * `state` holds layout, grade, caption, subtitle, photos and panels.
+ */
+export function drawCover(canvas, state) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  const grade = GRADES[state.grade] || GRADES.sunset;
+  const rects = panelRects(state.layout, w, h);
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#12081f';
+  ctx.fillRect(0, 0, w, h);
+
+  rects.forEach((rect, i) => {
+    const panel = state.panels[i] || blankPanel();
+    const photo = panel.photo >= 0 ? state.photos[panel.photo] : null;
+    if (photo) {
+      drawPhoto(ctx, photo, rect, panel, grade.filter);
+    } else {
+      drawEmptyPanel(ctx, rect);
+    }
+  });
+
+  // The sunset strip, caption and subtitle across the foot of the cover.
+  const { bandH, bandY } = drawSunsetBand(ctx, w, h);
+  drawCaption(ctx, w, h, bandY, bandH, state.caption);
+  drawSubtitle(ctx, w, h, bandY, bandH, state.subtitle);
+
+  // Grade tint, then a thin white frame to finish.
   ctx.fillStyle = grade.wash;
   ctx.fillRect(0, 0, w, h);
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
@@ -322,7 +330,7 @@ export function drawCover(canvas, state) {
   ctx.strokeRect(ctx.lineWidth / 2, ctx.lineWidth / 2, w - ctx.lineWidth, h - ctx.lineWidth);
 }
 
-/** Renders the cover at an export size on a fresh canvas and returns it. */
+/** Paints the cover at an export size on a fresh canvas and returns it. */
 export function renderCover(state, width, height) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
